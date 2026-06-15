@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tobera — Consultor DataJud Nacional</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #1e2433; font-size: 13px; min-height: 100vh; }
+:root {
+  --navy: #0f1f3d; --navy-mid: #1a3260;
+  --gold: #c9a84c; --gold-light: #e8c870; --gold-pale: #fdf6e3;
+  --red: #b91c1c; --red-bg: #fef2f2;
+  --yellow: #b45309; --yellow-bg: #fffbeb;
+  --green: #1a7a4a; --green-bg: #e8f5ee;
+  --blue: #1d4ed8; --blue-bg: #eff6ff;
+  --purple: #6d28d9; --purple-bg: #f5f3ff;
+  --gray-50: #f8f9fb; --gray-100: #eef0f5; --gray-200: #d6dae6;
+  --gray-400: #8b92a8; --gray-600: #4a5068; --gray-800: #1e2433;
+  --white: #ffffff;
+}
+.header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%); border-bottom: 3px solid var(--gold); }
+.header-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.logo { width: 40px; height: 40px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; color: var(--navy); flex-shrink: 0; }
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.header-title { font-weight: 700; font-size: 16px; color: var(--white); }
+.header-sub { font-size: 10px; color: var(--gold-light); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+.header-right { font-size: 11px; color: var(--gold-light); text-align: right; }
+.header-right strong { display: block; color: var(--white); font-size: 12px; }
+.main { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+.tabs { display: flex; gap: 4px; background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; padding: 4px; width: fit-content; margin-bottom: 16px; flex-wrap: wrap; }
+.tab { padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--gray-600); transition: all 0.15s; white-space: nowrap; }
+.tab.active { background: var(--navy); color: var(--white); }
+.tab:hover:not(.active) { background: var(--gray-100); }
+.grid { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+.card { background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+.card-head { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); }
+.card-head.dark { background: var(--navy); }
+.card-head.dark .card-title { color: var(--gold); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.card-head.dark .card-sub { color: var(--gold-light); font-size: 10px; margin-top: 2px; }
+.card-title { font-weight: 600; font-size: 13px; color: var(--navy); }
+.card-sub { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+.card-body { padding: 14px 16px; }
+.entidade-item { padding: 9px 16px; display: flex; align-items: center; gap: 9px; cursor: pointer; border-bottom: 1px solid var(--gray-100); border-left: 3px solid transparent; transition: all 0.12s; }
+.entidade-item:hover { background: var(--gray-50); }
+.entidade-item.checked { background: var(--gold-pale); border-left-color: var(--gold); }
+.entidade-item:last-child { border-bottom: none; }
+.check-box { width: 16px; height: 16px; border-radius: 3px; border: 2px solid var(--gray-200); background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--navy); flex-shrink: 0; transition: all 0.12s; }
+.entidade-item.checked .check-box { background: var(--gold); border-color: var(--gold); }
+.ent-nome { font-weight: 600; font-size: 11px; color: var(--navy); line-height: 1.3; }
+.ent-doc { font-size: 10px; color: var(--gray-400); font-family: monospace; margin-top: 1px; }
+.ent-grupo { font-size: 9px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.grupo-header { padding: 6px 16px; background: var(--gray-50); border-bottom: 1px solid var(--gray-100); font-size: 10px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; justify-content: space-between; }
+.small-btns { padding: 7px 16px; display: flex; gap: 5px; flex-wrap: wrap; }
+.trib-section { padding: 8px 16px 4px; }
+.trib-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; display: block; }
+.trib-chips-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.trib-chip { padding: 4px 9px; border-radius: 5px; font-size: 10px; font-weight: 600; cursor: pointer; border: 1px solid var(--gray-200); background: var(--white); color: var(--gray-600); transition: all 0.12s; white-space: nowrap; }
+.trib-chip.sel { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.trib-chip:hover:not(.sel) { background: var(--gray-100); }
+.form-group { margin-bottom: 11px; }
+.form-label { font-size: 11px; font-weight: 500; color: var(--gray-600); display: block; margin-bottom: 4px; }
+.form-input, .form-select { width: 100%; padding: 8px 11px; border-radius: 7px; border: 1px solid var(--gray-200); font-size: 13px; font-family: inherit; outline: none; transition: border 0.15s; }
+.form-input:focus, .form-select:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,31,61,0.07); }
+.btn-primary { width: 100%; background: var(--navy); color: var(--white); border: none; border-radius: 8px; padding: 12px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+.btn-primary:hover:not(:disabled) { background: var(--navy-mid); }
+.btn-primary:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
+.btn-sm { font-size: 10px; padding: 3px 9px; border-radius: 5px; border: 1px solid var(--gray-200); background: var(--white); cursor: pointer; color: var(--gray-600); transition: all 0.12s; white-space: nowrap; }
+.btn-sm:hover { background: var(--gray-100); }
+.btn-action { font-size: 11px; padding: 4px 9px; border-radius: 5px; border: 1px solid var(--gray-200); background: var(--white); cursor: pointer; color: var(--gray-600); transition: all 0.12s; }
+.btn-action:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.progress-bar-bg { background: var(--gray-100); border-radius: 100px; height: 6px; overflow: hidden; margin-top: 8px; }
+.progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--navy), var(--gold)); transition: width 0.3s ease; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+.stat-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; padding: 12px 14px; }
+.stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); }
+.stat-value { font-size: 24px; font-weight: 700; line-height: 1.2; margin-top: 4px; }
+.filtros { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.filtro-btn { padding: 5px 13px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--gray-200); background: var(--white); color: var(--gray-600); transition: all 0.12s; }
+.filtro-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.proc-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.proc-head { padding: 11px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.proc-num { font-weight: 700; font-size: 12px; color: var(--navy); font-family: Georgia, serif; }
+.proc-assunto { font-size: 11px; color: var(--gray-600); margin-top: 3px; }
+.proc-badges { display: flex; gap: 5px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+.badge-trib { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--navy); color: var(--white); white-space: nowrap; }
+.badge-ent { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--gold-pale); color: var(--gold); border: 1px solid var(--gold); white-space: nowrap; }
+.proc-body { padding: 10px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+.proc-field label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); display: block; margin-bottom: 2px; }
+.proc-field span { font-size: 11px; color: var(--gray-800); font-weight: 500; }
+.proc-mov { padding: 0 16px 10px; }
+.mov-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); margin-bottom: 4px; }
+.mov-row { display: flex; gap: 10px; align-items: flex-start; }
+.mov-date { font-size: 10px; color: var(--gray-400); white-space: nowrap; min-width: 75px; }
+.mov-text { font-size: 11px; color: var(--gray-700); line-height: 1.4; }
+.proc-foot { padding: 8px 16px; background: var(--gray-50); border-top: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.dias-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+.dias-red { background: var(--red-bg); color: var(--red); }
+.dias-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.dias-green { background: var(--green-bg); color: var(--green); }
+.dias-gray { background: var(--gray-100); color: var(--gray-400); }
+.empty { background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; padding: 48px 24px; text-align: center; }
+.empty-icon { font-size: 36px; margin-bottom: 12px; }
+.empty h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+.empty p { font-size: 12px; color: var(--gray-400); max-width: 340px; margin: 0 auto; line-height: 1.6; }
+.erros-box { background: var(--red-bg); border: 1px solid var(--red); border-radius: 8px; padding: 11px 14px; margin-bottom: 12px; }
+.erros-title { font-weight: 600; font-size: 12px; color: var(--red); margin-bottom: 5px; }
+.erros-item { font-size: 10px; color: var(--red); margin-top: 2px; }
+.aviso { background: var(--gold-pale); border: 1px solid var(--gold); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 11px; color: var(--gray-700); line-height: 1.6; }
+.spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid var(--gray-200); border-top-color: var(--white); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.entidades-scroll { max-height: 340px; overflow-y: auto; }
+.entidades-scroll::-webkit-scrollbar { width: 4px; }
+.entidades-scroll::-webkit-scrollbar-track { background: var(--gray-100); }
+.entidades-scroll::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+.trib-scroll { max-height: 260px; overflow-y: auto; }
+.trib-scroll::-webkit-scrollbar { width: 4px; }
+.trib-scroll::-webkit-scrollbar-track { background: var(--gray-100); }
+.trib-scroll::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+.counter-badge { background: var(--navy); color: var(--gold); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="logo">T</div>
+      <div>
+        <div class="header-title">Tobera Advocacia — Consultor DataJud Nacional</div>
+        <div class="header-sub">API Pública CNJ · Todos os Tribunais do Brasil · Tempo Real</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span style="font-size:10px;color:var(--gold-light);text-transform:uppercase;letter-spacing:1px;">Clientes monitorados</span>
+      <strong id="hdr-counts">—</strong>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="tabs" id="tabs-container"></div>
+
+  <div class="aviso" id="aviso-top">
+    ℹ <strong>Como usar:</strong> Selecione o grupo de cliente na aba, marque os tribunais e clique em <strong>⚡ Consultar DataJud</strong>.
+    A consulta vai diretamente ao CNJ — sem intermediários. Certifique-se de estar conectado à internet.
+  </div>
+
+  <div class="grid">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- ENTIDADES -->
+      <div class="card">
+        <div class="card-head dark">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div class="card-title" id="ent-titulo">Entidades</div>
+              <div class="card-sub" id="ent-sub">Selecione para consultar</div>
+            </div>
+            <span class="counter-badge" id="ent-counter">0</span>
+          </div>
+        </div>
+        <div class="entidades-scroll" id="entidades-list"></div>
+        <div class="small-btns">
+          <button class="btn-sm" onclick="marcarTodasEnt()">Marcar todas</button>
+          <button class="btn-sm" onclick="desmarcarTodasEnt()">Desmarcar</button>
+          <button class="btn-sm" onclick="marcarApenasF()">Só PF</button>
+          <button class="btn-sm" onclick="marcarApenasPJ()">Só PJ</button>
+        </div>
+      </div>
+
+      <!-- ABA MANUAL (oculta por padrão) -->
+      <div class="card" id="painel-manual" style="display:none;">
+        <div class="card-head">
+          <div class="card-title">🔍 Consulta Avulsa</div>
+          <div class="card-sub">Qualquer CPF ou CNPJ</div>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="tipo-manual" onchange="atualizarLabel()">
+              <option value="cnpj">CNPJ</option>
+              <option value="cpf">CPF</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="label-doc">CNPJ (somente números)</label>
+            <input class="form-input" id="doc-manual" placeholder="00000000000000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nome / Identificação</label>
+            <input class="form-input" id="nome-manual" placeholder="Ex: Empresa XYZ" />
+          </div>
+        </div>
+      </div>
+
+      <!-- TRIBUNAIS -->
+      <div class="card">
+        <div class="card-head">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div class="card-title">Tribunais</div>
+              <div class="card-sub">Selecione onde consultar</div>
+            </div>
+            <span class="counter-badge" id="trib-counter">0</span>
+          </div>
+        </div>
+        <div class="small-btns" style="border-bottom:1px solid var(--gray-100);padding-bottom:9px;">
+          <button class="btn-sm" onclick="marcarTrib('todos')">✓ Todos</button>
+          <button class="btn-sm" onclick="marcarTrib('sul')">Sul</button>
+          <button class="btn-sm" onclick="marcarTrib('sudeste')">Sudeste</button>
+          <button class="btn-sm" onclick="marcarTrib('co')">C-Oeste</button>
+          <button class="btn-sm" onclick="marcarTrib('nordeste')">Nordeste</button>
+          <button class="btn-sm" onclick="marcarTrib('norte')">Norte</button>
+          <button class="btn-sm" onclick="marcarTrib('trabalho')">Trabalhistas</button>
+          <button class="btn-sm" onclick="marcarTrib('federal')">Federal</button>
+          <button class="btn-sm" onclick="marcarTrib('limpar')">✕ Limpar</button>
+        </div>
+        <div class="trib-scroll" id="trib-chips"></div>
+      </div>
+
+      <button class="btn-primary" id="btn-consultar" onclick="consultar()">⚡ Consultar DataJud</button>
+
+      <div id="painel-progresso" style="display:none;" class="card">
+        <div class="card-body">
+          <div style="font-size:11px;color:var(--gray-600);" id="prog-msg">Iniciando...</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
+          <div style="font-size:10px;color:var(--gray-400);margin-top:5px;text-align:right;" id="prog-count">0 / 0</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="resultados-area">
+      <div class="empty">
+        <div class="empty-icon">⚖️</div>
+        <h3>Selecione um grupo e consulte</h3>
+        <p>Escolha a aba do cliente, selecione os tribunais e clique em Consultar DataJud para rastrear processos em todo o Brasil.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATAJUD_KEY = "cDZHYzlZa0JadVREZDJCendFbXNpTT";
+
+// ═══════════════════════════════════════════════════════════════════
+// GRUPOS DE CLIENTES
+// ═══════════════════════════════════════════════════════════════════
+const GRUPOS = {
+  "chico": {
+    label: "⬡ Chico Eletro",
+    entidades: [
+      { nome: "Francisco Puton",                      doc: "21428050949",    tipo: "cpf",  label: "214.280.509-49",    icon: "👤" },
+      { nome: "Puton & Dal Molin Ltda.",               doc: "85482594000177", tipo: "cnpj", label: "85.482.594/0001-77", icon: "🏢" },
+      { nome: "Elektro Instaladora Ltda.",             doc: "29687110000155", tipo: "cnpj", label: "29.687.110/0001-55", icon: "🏢" },
+      { nome: "Instaladora Elétrica Dois Irmãos Ltda.",doc: "17472057000196", tipo: "cnpj", label: "17.472.057/0001-96", icon: "🏢" },
+    ]
+  },
+  "sudati": {
+    label: "⬡ Grupo Sudati",
+    entidades: [
+      // Pessoas Físicas
+      { nome: "Luiz Alberto Sudati",           doc: "54272653920",  tipo: "cpf",  label: "542.726.539-20", icon: "👤", sub: "Sócio / Presidente" },
+      { nome: "Tatiane Carla Pedroso Sudati",  doc: "00183626990",  tipo: "cpf",  label: "001.836.269-90", icon: "👤", sub: "Sócia" },
+      { nome: "João Carlos Ribeiro Pedroso",   doc: "25105418972",  tipo: "cpf",  label: "251.054.189-72", icon: "👤", sub: "Sócio Guararapes" },
+      // Ind. Compensados Sudati Ltda.
+      { nome: "Ind. Compensados Sudati — Matriz",        doc: "02314153000139", tipo: "cnpj", label: "02.314.153/0001-39", icon: "🏢", sub: "Palmas/PR" },
+      { nome: "Ind. Compensados Sudati — Fil. Ibaiti",   doc: "02314153000210", tipo: "cnpj", label: "02.314.153/0002-10", icon: "🏢", sub: "Ibaiti/PR" },
+      { nome: "Ind. Compensados Sudati — Fil. Ventania 1",doc:"02314153000309", tipo: "cnpj", label: "02.314.153/0003-09", icon: "🏢", sub: "Ventania/PR" },
+      { nome: "Ind. Compensados Sudati — Fil. Painel/SC", doc:"02314153000481", tipo: "cnpj", label: "02.314.153/0004-81", icon: "🏢", sub: "Painel/SC" },
+      { nome: "Ind. Compensados Sudati — Fil. Água Doce", doc:"02314153000562", tipo: "cnpj", label: "02.314.153/0005-62", icon: "🏢", sub: "Água Doce/SC" },
+      { nome: "Ind. Compensados Sudati — Fil. Ventania 2",doc:"02314153000643", tipo: "cnpj", label: "02.314.153/0006-43", icon: "🏢", sub: "Ventania/PR" },
+      { nome: "Ind. Compensados Sudati — Fil. Telêmaco",  doc:"02314153000724", tipo: "cnpj", label: "02.314.153/0007-24", icon: "🏢", sub: "Telêmaco Borba/PR" },
+      { nome: "Ind. Compensados Sudati — Fil. Mangueirinha",doc:"02314153000805",tipo:"cnpj", label: "02.314.153/0008-05", icon: "🏢", sub: "Mangueirinha/PR" },
+      { nome: "Ind. Compensados Sudati — Fil. Palmas Rural",doc:"02314153000996",tipo:"cnpj", label: "02.314.153/0009-96", icon: "🏢", sub: "Palmas/PR" },
+      // Sudati Painéis S.A.
+      { nome: "Sudati Painéis S.A. — Matriz",  doc: "08803452000113", tipo: "cnpj", label: "08.803.452/0001-13", icon: "🏢", sub: "Otacílio Costa/SC" },
+      { nome: "Sudati Painéis S.A. — Fil. Vacaria",doc:"08803452000202",tipo:"cnpj",label: "08.803.452/0002-02", icon: "🏢", sub: "Vacaria/RS" },
+      // Sudati Florestal Ltda.
+      { nome: "Sudati Florestal — Matriz",  doc: "03363495000101", tipo: "cnpj", label: "03.363.495/0001-01", icon: "🏢", sub: "Mangueirinha/PR" },
+      { nome: "Sudati Florestal — Fil. 2",  doc: "03363495000292", tipo: "cnpj", label: "03.363.495/0002-92", icon: "🏢", sub: "" },
+      { nome: "Sudati Florestal — Fil. 3",  doc: "03363495000373", tipo: "cnpj", label: "03.363.495/0003-73", icon: "🏢", sub: "" },
+      { nome: "Sudati Florestal — Fil. 4",  doc: "03363495000454", tipo: "cnpj", label: "03.363.495/0004-54", icon: "🏢", sub: "" },
+      { nome: "Sudati Florestal — Fil. 5",  doc: "03363495000535", tipo: "cnpj", label: "03.363.495/0005-35", icon: "🏢", sub: "" },
+      { nome: "Sudati Florestal — Fil. 6",  doc: "03363495000616", tipo: "cnpj", label: "03.363.495/0006-16", icon: "🏢", sub: "" },
+      { nome: "Sudati Florestal — Fil. 7",  doc: "03363495000705", tipo: "cnpj", label: "03.363.495/0007-05", icon: "🏢", sub: "" },
+      // Mares Transportes
+      { nome: "Mares Transportes — Matriz", doc: "82286915000170", tipo: "cnpj", label: "82.286.915/0001-70", icon: "🏢", sub: "Contenda/PR" },
+      { nome: "Mares Transportes — Filial", doc: "82286915000250", tipo: "cnpj", label: "82.286.915/0002-50", icon: "🏢", sub: "" },
+      // Ind. Compensados Sul Norte
+      { nome: "Ind. Sul Norte — Matriz",    doc: "72062524000118", tipo: "cnpj", label: "72.062.524/0001-18", icon: "🏢", sub: "Ventania/PR" },
+      { nome: "Ind. Sul Norte — Filial",    doc: "72062524000207", tipo: "cnpj", label: "72.062.524/0002-07", icon: "🏢", sub: "" },
+      // Demais
+      { nome: "Ibaipinus Ind. Madeireira",  doc: "05245668000112", tipo: "cnpj", label: "05.245.668/0001-12", icon: "🏢", sub: "Ibaiti/PR" },
+      { nome: "Sudati Agroflorestal",       doc: "44577869000179", tipo: "cnpj", label: "44.577.869/0001-79", icon: "🏢", sub: "Palmas/PR" },
+      { nome: "Conply Ind. de Compensados", doc: "05234373000140", tipo: "cnpj", label: "05.234.373/0001-40", icon: "🏢", sub: "Mangueirinha/PR" },
+      { nome: "Ind. Compensados Guararapes",doc: "77911261000198", tipo: "cnpj", label: "77.911.261/0001-98", icon: "🏢", sub: "Palmas/PR" },
+    ]
+  },
+  "manual": { label: "🔍 Consulta Avulsa", entidades: [] }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// TRIBUNAIS — TODOS DO BRASIL
+// ═══════════════════════════════════════════════════════════════════
+const TRIBUNAIS = [
+  { id:"stj",   label:"STJ",   full:"Superior Tribunal de Justiça",                       grupo:"Superiores" },
+  { id:"stf",   label:"STF",   full:"Supremo Tribunal Federal",                           grupo:"Superiores" },
+  { id:"tst",   label:"TST",   full:"Tribunal Superior do Trabalho",                      grupo:"Superiores" },
+  { id:"tse",   label:"TSE",   full:"Tribunal Superior Eleitoral",                        grupo:"Superiores" },
+  { id:"trf1",  label:"TRF1",  full:"TRF 1ª Região (AC, AM, AP, BA, GO, MA, MG, MT, PA, PI, RO, RR, TO, DF)", grupo:"Justiça Federal" },
+  { id:"trf2",  label:"TRF2",  full:"TRF 2ª Região (RJ e ES)",                            grupo:"Justiça Federal" },
+  { id:"trf3",  label:"TRF3",  full:"TRF 3ª Região (SP e MS)",                            grupo:"Justiça Federal" },
+  { id:"trf4",  label:"TRF4",  full:"TRF 4ª Região (PR, SC, RS)",                         grupo:"Justiça Federal" },
+  { id:"trf5",  label:"TRF5",  full:"TRF 5ª Região (AL, CE, PB, PE, RN, SE)",             grupo:"Justiça Federal" },
+  { id:"trf6",  label:"TRF6",  full:"TRF 6ª Região (MG)",                                 grupo:"Justiça Federal" },
+  { id:"trt1",  label:"TRT1",  full:"TRT 1ª — Rio de Janeiro",                            grupo:"Justiça do Trabalho" },
+  { id:"trt2",  label:"TRT2",  full:"TRT 2ª — São Paulo (capital e Grande SP)",            grupo:"Justiça do Trabalho" },
+  { id:"trt3",  label:"TRT3",  full:"TRT 3ª — Minas Gerais",                              grupo:"Justiça do Trabalho" },
+  { id:"trt4",  label:"TRT4",  full:"TRT 4ª — Rio Grande do Sul",                         grupo:"Justiça do Trabalho" },
+  { id:"trt5",  label:"TRT5",  full:"TRT 5ª — Bahia",                                     grupo:"Justiça do Trabalho" },
+  { id:"trt6",  label:"TRT6",  full:"TRT 6ª — Pernambuco",                                grupo:"Justiça do Trabalho" },
+  { id:"trt7",  label:"TRT7",  full:"TRT 7ª — Ceará",                                     grupo:"Justiça do Trabalho" },
+  { id:"trt8",  label:"TRT8",  full:"TRT 8ª — Pará e Amapá",                              grupo:"Justiça do Trabalho" },
+  { id:"trt9",  label:"TRT9",  full:"TRT 9ª — Paraná",                                    grupo:"Justiça do Trabalho" },
+  { id:"trt10", label:"TRT10", full:"TRT 10ª — DF e Tocantins",                           grupo:"Justiça do Trabalho" },
+  { id:"trt11", label:"TRT11", full:"TRT 11ª — Amazonas e Roraima",                       grupo:"Justiça do Trabalho" },
+  { id:"trt12", label:"TRT12", full:"TRT 12ª — Santa Catarina",                           grupo:"Justiça do Trabalho" },
+  { id:"trt13", label:"TRT13", full:"TRT 13ª — Paraíba",                                  grupo:"Justiça do Trabalho" },
+  { id:"trt14", label:"TRT14", full:"TRT 14ª — Rondônia e Acre",                          grupo:"Justiça do Trabalho" },
+  { id:"trt15", label:"TRT15", full:"TRT 15ª — Campinas/SP interior",                     grupo:"Justiça do Trabalho" },
+  { id:"trt16", label:"TRT16", full:"TRT 16ª — Maranhão",                                 grupo:"Justiça do Trabalho" },
+  { id:"trt17", label:"TRT17", full:"TRT 17ª — Espírito Santo",                           grupo:"Justiça do Trabalho" },
+  { id:"trt18", label:"TRT18", full:"TRT 18ª — Goiás",                                    grupo:"Justiça do Trabalho" },
+  { id:"trt19", label:"TRT19", full:"TRT 19ª — Alagoas",                                  grupo:"Justiça do Trabalho" },
+  { id:"trt20", label:"TRT20", full:"TRT 20ª — Sergipe",                                  grupo:"Justiça do Trabalho" },
+  { id:"trt21", label:"TRT21", full:"TRT 21ª — Rio Grande do Norte",                      grupo:"Justiça do Trabalho" },
+  { id:"trt22", label:"TRT22", full:"TRT 22ª — Piauí",                                    grupo:"Justiça do Trabalho" },
+  { id:"trt23", label:"TRT23", full:"TRT 23ª — Mato Grosso",                              grupo:"Justiça do Trabalho" },
+  { id:"trt24", label:"TRT24", full:"TRT 24ª — Mato Grosso do Sul",                       grupo:"Justiça do Trabalho" },
+  { id:"tjpr",  label:"TJPR",  full:"Tribunal de Justiça do Paraná",                      grupo:"Estadual — Sul" },
+  { id:"tjsc",  label:"TJSC",  full:"Tribunal de Justiça de Santa Catarina",              grupo:"Estadual — Sul" },
+  { id:"tjrs",  label:"TJRS",  full:"Tribunal de Justiça do Rio Grande do Sul",           grupo:"Estadual — Sul" },
+  { id:"tjsp",  label:"TJSP",  full:"Tribunal de Justiça de São Paulo",                   grupo:"Estadual — Sudeste" },
+  { id:"tjrj",  label:"TJRJ",  full:"Tribunal de Justiça do Rio de Janeiro",              grupo:"Estadual — Sudeste" },
+  { id:"tjmg",  label:"TJMG",  full:"Tribunal de Justiça de Minas Gerais",                grupo:"Estadual — Sudeste" },
+  { id:"tjes",  label:"TJES",  full:"Tribunal de Justiça do Espírito Santo",              grupo:"Estadual — Sudeste" },
+  { id:"tjmt",  label:"TJMT",  full:"Tribunal de Justiça de Mato Grosso",                 grupo:"Estadual — Centro-Oeste" },
+  { id:"tjms",  label:"TJMS",  full:"Tribunal de Justiça de Mato Grosso do Sul",          grupo:"Estadual — Centro-Oeste" },
+  { id:"tjgo",  label:"TJGO",  full:"Tribunal de Justiça de Goiás",                       grupo:"Estadual — Centro-Oeste" },
+  { id:"tjdft", label:"TJDFT", full:"Tribunal de Justiça do DF e Territórios",            grupo:"Estadual — Centro-Oeste" },
+  { id:"tjba",  label:"TJBA",  full:"Tribunal de Justiça da Bahia",                       grupo:"Estadual — Nordeste" },
+  { id:"tjce",  label:"TJCE",  full:"Tribunal de Justiça do Ceará",                       grupo:"Estadual — Nordeste" },
+  { id:"tjma",  label:"TJMA",  full:"Tribunal de Justiça do Maranhão",                    grupo:"Estadual — Nordeste" },
+  { id:"tjpb",  label:"TJPB",  full:"Tribunal de Justiça da Paraíba",                     grupo:"Estadual — Nordeste" },
+  { id:"tjpe",  label:"TJPE",  full:"Tribunal de Justiça de Pernambuco",                  grupo:"Estadual — Nordeste" },
+  { id:"tjpi",  label:"TJPI",  full:"Tribunal de Justiça do Piauí",                       grupo:"Estadual — Nordeste" },
+  { id:"tjrn",  label:"TJRN",  full:"Tribunal de Justiça do Rio Grande do Norte",         grupo:"Estadual — Nordeste" },
+  { id:"tjal",  label:"TJAL",  full:"Tribunal de Justiça de Alagoas",                     grupo:"Estadual — Nordeste" },
+  { id:"tjse",  label:"TJSE",  full:"Tribunal de Justiça de Sergipe",                     grupo:"Estadual — Nordeste" },
+  { id:"tjam",  label:"TJAM",  full:"Tribunal de Justiça do Amazonas",                    grupo:"Estadual — Norte" },
+  { id:"tjpa",  label:"TJPA",  full:"Tribunal de Justiça do Pará",                        grupo:"Estadual — Norte" },
+  { id:"tjro",  label:"TJRO",  full:"Tribunal de Justiça de Rondônia",                    grupo:"Estadual — Norte" },
+  { id:"tjac",  label:"TJAC",  full:"Tribunal de Justiça do Acre",                        grupo:"Estadual — Norte" },
+  { id:"tjap",  label:"TJAP",  full:"Tribunal de Justiça do Amapá",                       grupo:"Estadual — Norte" },
+  { id:"tjrr",  label:"TJRR",  full:"Tribunal de Justiça de Roraima",                     grupo:"Estadual — Norte" },
+  { id:"tjto",  label:"TJTO",  full:"Tribunal de Justiça do Tocantins",                   grupo:"Estadual — Norte" },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════════════
+let grupoAtual = "chico";
+let entidadesSel = new Set();
+let tribunaisSel = new Set(["tjpr","trf4","trt9","tjsc","trt12","tjrs","trt4"]);
+let resultados = [], erros = [], loading = false, filtroAtual = "todos";
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+window.onload = function() {
+  renderTabs();
+  switchGrupo("chico");
+  renderTribunais();
+  atualizarHeaderCounts();
+};
+
+function atualizarHeaderCounts() {
+  const total = Object.values(GRUPOS).reduce((s,g) => s + g.entidades.length, 0);
+  document.getElementById("hdr-counts").textContent =
+    `${total} documentos · ${Object.keys(GRUPOS).length - 1} grupos`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════════
+function renderTabs() {
+  const container = document.getElementById("tabs-container");
+  container.innerHTML = Object.entries(GRUPOS).map(([id, g]) => `
+    <button class="tab ${id === grupoAtual ? 'active' : ''}" onclick="switchGrupo('${id}')">${g.label}</button>
+  `).join("");
+}
+
+function switchGrupo(id) {
+  grupoAtual = id;
+  renderTabs();
+  const isManual = id === "manual";
+  document.getElementById("painel-manual").style.display = isManual ? "" : "none";
+
+  const g = GRUPOS[id];
+  if (!isManual) {
+    entidadesSel = new Set(g.entidades.map(e => e.doc));
+    document.getElementById("ent-titulo").textContent = g.label.replace(/^⬡ /, "");
+    document.getElementById("ent-sub").textContent = `${g.entidades.length} entidades — todas selecionadas`;
+  }
+  renderEntidades();
+  document.getElementById("resultados-area").innerHTML = emptyHTML(
+    isManual ? "Consulta Avulsa" : g.label,
+    isManual
+      ? "Informe o CPF ou CNPJ, selecione os tribunais e consulte."
+      : `${g.entidades.length} entidades prontas. Selecione os tribunais e clique em Consultar DataJud.`
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ENTIDADES
+// ═══════════════════════════════════════════════════════════════════
+function renderEntidades() {
+  const list = document.getElementById("entidades-list");
+  const g = GRUPOS[grupoAtual];
+  if (!g || g.entidades.length === 0) { list.innerHTML = ""; return; }
+
+  list.innerHTML = g.entidades.map(e => `
+    <div class="entidade-item ${entidadesSel.has(e.doc) ? 'checked' : ''}" onclick="toggleEnt('${e.doc}')">
+      <div class="check-box">${entidadesSel.has(e.doc) ? '✓' : ''}</div>
+      <div style="min-width:0;">
+        <div class="ent-nome">${e.icon} ${e.nome}</div>
+        <div class="ent-doc">${e.tipo.toUpperCase()} ${e.label}${e.sub ? ' · ' + e.sub : ''}</div>
+      </div>
+    </div>`).join("");
+
+  document.getElementById("ent-counter").textContent = entidadesSel.size + "/" + g.entidades.length;
+}
+
+function toggleEnt(doc) {
+  if (entidadesSel.has(doc)) entidadesSel.delete(doc);
+  else entidadesSel.add(doc);
+  renderEntidades();
+}
+
+function marcarTodasEnt()  { GRUPOS[grupoAtual].entidades.forEach(e => entidadesSel.add(e.doc)); renderEntidades(); }
+function desmarcarTodasEnt() { entidadesSel.clear(); renderEntidades(); }
+function marcarApenasF()   { entidadesSel.clear(); GRUPOS[grupoAtual].entidades.filter(e => e.tipo==="cpf").forEach(e => entidadesSel.add(e.doc)); renderEntidades(); }
+function marcarApenasPJ()  { entidadesSel.clear(); GRUPOS[grupoAtual].entidades.filter(e => e.tipo==="cnpj").forEach(e => entidadesSel.add(e.doc)); renderEntidades(); }
+
+// ═══════════════════════════════════════════════════════════════════
+// TRIBUNAIS
+// ═══════════════════════════════════════════════════════════════════
+const COR_GRUPO = {
+  "Superiores":            "#0f1f3d",
+  "Justiça Federal":       "#1d4ed8",
+  "Justiça do Trabalho":   "#1a7a4a",
+  "Estadual — Sul":        "#065f46",
+  "Estadual — Sudeste":    "#92400e",
+  "Estadual — Centro-Oeste":"#b91c1c",
+  "Estadual — Nordeste":   "#6d28d9",
+  "Estadual — Norte":      "#0369a1",
+};
+
+function renderTribunais() {
+  const container = document.getElementById("trib-chips");
+  const grupos = {};
+  TRIBUNAIS.forEach(t => { if (!grupos[t.grupo]) grupos[t.grupo]=[]; grupos[t.grupo].push(t); });
+
+  let html = "";
+  Object.entries(grupos).forEach(([nome, lista]) => {
+    const cor = COR_GRUPO[nome] || "#4a5068";
+    html += `<div class="trib-section">
+      <span class="trib-section-label" style="color:${cor};">${nome}</span>
+      <div class="trib-chips-row">
+        ${lista.map(t => `<button class="trib-chip ${tribunaisSel.has(t.id)?'sel':''}"
+          title="${t.full}" onclick="toggleTrib('${t.id}')">${t.label}</button>`).join("")}
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  document.getElementById("trib-counter").textContent = tribunaisSel.size + "/" + TRIBUNAIS.length;
+}
+
+function toggleTrib(id) {
+  if (tribunaisSel.has(id)) tribunaisSel.delete(id);
+  else tribunaisSel.add(id);
+  renderTribunais();
+}
+
+function marcarTrib(modo) {
+  const por_grupo = (g) => TRIBUNAIS.filter(t => t.grupo === g).map(t => t.id);
+  if (modo === "todos")    { TRIBUNAIS.forEach(t => tribunaisSel.add(t.id)); }
+  else if (modo==="limpar") { tribunaisSel.clear(); }
+  else if (modo==="sul")    { tribunaisSel.clear(); [...por_grupo("Estadual — Sul"),...por_grupo("Justiça do Trabalho").filter(id=>["trt4","trt9","trt12"].includes(id)),"trf4"].forEach(id=>tribunaisSel.add(id)); }
+  else if (modo==="sudeste"){ tribunaisSel.clear(); [...por_grupo("Estadual — Sudeste"),"trt1","trt2","trt3","trt15","trt17","trf2","trf3"].forEach(id=>tribunaisSel.add(id)); }
+  else if (modo==="co")     { tribunaisSel.clear(); [...por_grupo("Estadual — Centro-Oeste"),"trt10","trt18","trt23","trt24","trf1"].forEach(id=>tribunaisSel.add(id)); }
+  else if (modo==="nordeste"){ tribunaisSel.clear(); [...por_grupo("Estadual — Nordeste"),"trt5","trt6","trt7","trt13","trt16","trt19","trt20","trt21","trt22","trf5"].forEach(id=>tribunaisSel.add(id)); }
+  else if (modo==="norte")  { tribunaisSel.clear(); [...por_grupo("Estadual — Norte"),"trt8","trt11","trt14","trf1"].forEach(id=>tribunaisSel.add(id)); }
+  else if (modo==="trabalho"){ tribunaisSel.clear(); TRIBUNAIS.filter(t=>t.grupo==="Justiça do Trabalho"||t.id==="tst").forEach(t=>tribunaisSel.add(t.id)); }
+  else if (modo==="federal") { tribunaisSel.clear(); TRIBUNAIS.filter(t=>t.grupo==="Justiça Federal"||t.grupo==="Superiores").forEach(t=>tribunaisSel.add(t.id)); }
+  renderTribunais();
+}
+
+function atualizarLabel() {
+  const tipo = document.getElementById("tipo-manual").value;
+  document.getElementById("label-doc").textContent = tipo==="cpf" ? "CPF (somente números)" : "CNPJ (somente números)";
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONSULTA DATAJUD
+// ═══════════════════════════════════════════════════════════════════
+async function consultarDatajud(tribunal, doc) {
+  const url = `https://api-publica.datajud.cnj.jus.br/api_publica_${tribunal}/_search`;
+  const body = {
+    size: 20,
+    _source:["numeroProcesso","classe","assunto","orgaoJulgador","dataAjuizamento","movimentos","partes","valor"],
+    query:{ nested:{ path:"partes", query:{ bool:{ must:[{ match:{ "partes.CPFouCNPJ": doc.replace(/\D/g,"") }}]}}}},
+    sort:[{ dataAjuizamento:{ order:"desc" }}]
+  };
+  const resp = await fetch(url, { method:"POST", headers:{ "Authorization":`ApiKey ${DATAJUD_KEY}`, "Content-Type":"application/json" }, body: JSON.stringify(body) });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const data = await resp.json();
+  return (data.hits?.hits||[]).map(h=>h._source);
+}
+
+async function consultar() {
+  if (loading) return;
+
+  let alvos = [];
+  if (grupoAtual === "manual") {
+    const doc  = document.getElementById("doc-manual").value.replace(/\D/g,"");
+    const tipo = document.getElementById("tipo-manual").value;
+    const nome = document.getElementById("nome-manual").value.trim() || doc;
+    if (!doc) { toast("Informe o CPF ou CNPJ."); return; }
+    alvos = [{ nome, doc, tipo, label: doc, icon: tipo==="cpf"?"👤":"🏢" }];
+  } else {
+    const g = GRUPOS[grupoAtual];
+    alvos = g.entidades.filter(e => entidadesSel.has(e.doc));
+    if (!alvos.length) { toast("Selecione ao menos uma entidade."); return; }
+  }
+
+  if (!tribunaisSel.size) { toast("Selecione ao menos um tribunal."); return; }
+
+  loading = true; resultados = []; erros = [];
+  const btn = document.getElementById("btn-consultar");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Consultando...';
+  document.getElementById("painel-progresso").style.display = "";
+
+  const tribList = Array.from(tribunaisSel);
+  const total = alvos.length * tribList.length;
+  let atual = 0;
+
+  document.getElementById("resultados-area").innerHTML = emptyHTML("Consultando tribunais...", "Aguarde enquanto buscamos nos tribunais selecionados.");
+
+  for (const alvo of alvos) {
+    for (const trib of tribList) {
+      atual++;
+      document.getElementById("prog-msg").textContent = `${trib.toUpperCase()} — ${alvo.nome}`;
+      document.getElementById("prog-count").textContent = `${atual} / ${total}`;
+      document.getElementById("prog-bar").style.width = `${(atual/total)*100}%`;
+      try {
+        const procs = await consultarDatajud(trib, alvo.doc);
+        procs.forEach(p => resultados.push({...p, _entidade:alvo.nome, _doc:alvo.label, _tribunal:trib.toUpperCase()}));
+      } catch(e) {
+        erros.push(`${alvo.nome} / ${trib.toUpperCase()}: ${e.message}`);
+      }
+    }
+  }
+
+  loading = false;
+  btn.disabled = false; btn.innerHTML = "⚡ Consultar DataJud";
+  document.getElementById("painel-progresso").style.display = "none";
+  renderResultados("todos");
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER RESULTADOS
+// ═══════════════════════════════════════════════════════════════════
+function renderResultados(filtro) {
+  filtroAtual = filtro || filtroAtual;
+  const area = document.getElementById("resultados-area");
+
+  const filtrados = resultados.filter(r => {
+    if (filtroAtual==="todos") return true;
+    const mov = r.movimentos?.[0];
+    const data = mov?.dataHora ? new Date(mov.dataHora) : null;
+    const dias = data ? Math.floor((Date.now()-data)/86400000) : 999;
+    if (filtroAtual==="recente") return dias<=30;
+    if (filtroAtual==="ativo") return dias<=180;
+    return true;
+  });
+
+  const tribunais = [...new Set(resultados.map(r=>r._tribunal))].length;
+  const entidades = [...new Set(resultados.map(r=>r._entidade))].length;
+  const recentes  = resultados.filter(r=>{ const m=r.movimentos?.[0]; const d=m?.dataHora?new Date(m.dataHora):null; return d&&Math.floor((Date.now()-d)/86400000)<=30; }).length;
+
+  let html = "";
+
+  if (resultados.length > 0) {
+    html += `<div class="stats-row">
+      ${[
+        {label:"Processos",val:resultados.length,color:"var(--navy)"},
+        {label:"Tribunais",val:tribunais,color:"var(--blue)"},
+        {label:"Entidades",val:entidades,color:"var(--gold)"},
+        {label:"Últ. 30 dias",val:recentes,color:"var(--green)"},
+      ].map(s=>`<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value" style="color:${s.color}">${s.val}</div></div>`).join("")}
+    </div>
+    <div class="filtros">
+      <button class="filtro-btn ${filtroAtual==='todos'?'active':''}" onclick="renderResultados('todos')">Todos (${resultados.length})</button>
+      <button class="filtro-btn ${filtroAtual==='recente'?'active':''}" onclick="renderResultados('recente')">Últ. 30 dias (${recentes})</button>
+      <button class="filtro-btn ${filtroAtual==='ativo'?'active':''}" onclick="renderResultados('ativo')">Ativos 6 meses</button>
+    </div>`;
+  }
+
+  if (erros.length) {
+    html += `<div class="erros-box"><div class="erros-title">⚠ ${erros.length} erro(s) — demais resultados foram processados</div>
+      ${erros.slice(0,10).map(e=>`<div class="erros-item">• ${e}</div>`).join("")}
+      ${erros.length>10?`<div class="erros-item">... e mais ${erros.length-10} erros</div>`:""}
+    </div>`;
+  }
+
+  if (!resultados.length && !erros.length) { html += emptyHTML("Nenhum processo encontrado","Tente outros tribunais ou verifique o documento."); }
+  if (!resultados.length && erros.length)  { html += emptyHTML("Consulta concluída com erros","Pode ser instabilidade nos tribunais — tente novamente."); }
+
+  filtrados.forEach(p => { html += cardProc(p); });
+  area.innerHTML = html;
+}
+
+function cardProc(p) {
+  const movs = p.movimentos||[];
+  const ult = movs[0];
+  const dData = ult?.dataHora ? new Date(ult.dataHora) : null;
+  const dias = dData ? Math.floor((Date.now()-dData)/86400000) : null;
+  const dClass = dias===null?"dias-gray":dias<=0?"dias-red":dias<=30?"dias-yellow":"dias-green";
+  const dLabel = dias===null?"—":dias===0?"Hoje":`${dias}d atrás`;
+  const classe  = p.classe?.nome||p.classe||"—";
+  const assunto = Array.isArray(p.assunto)?p.assunto.map(a=>a.nome||a).join(", "):(p.assunto?.nome||p.assunto||"—");
+  const orgao   = p.orgaoJulgador?.nome||"—";
+  const partes  = p.partes||[];
+  const autor   = partes.find(pt=>["AT","ATIVO"].includes(pt.polo))?.nome||"—";
+  const reu     = partes.find(pt=>["PA","PASSIVO"].includes(pt.polo))?.nome||"—";
+  const num     = p.numeroProcesso||"N° não disponível";
+  const entS    = p._entidade.split(" ").slice(0,3).join(" ");
+  const movDesc = ult?.nome||ult?.descricao||"Movimentação registrada";
+  const movComp = ult?.complementosTabelados?.[0]?.descricao||"";
+
+  return `<div class="proc-card">
+    <div class="proc-head">
+      <div style="flex:1;min-width:0;">
+        <div class="proc-num">${num}</div>
+        <div class="proc-assunto">${classe}${assunto!=="—"?" · "+assunto.slice(0,70):""}</div>
+      </div>
+      <div class="proc-badges">
+        <span class="badge-trib">${p._tribunal}</span>
+        <span class="badge-ent">${entS}</span>
+      </div>
+    </div>
+    <div class="proc-body">
+      <div class="proc-field"><label>Órgão Julgador</label><span>${orgao.slice(0,45)}</span></div>
+      <div class="proc-field"><label>Polo Ativo</label><span>${autor.slice(0,45)}${autor.length>45?"…":""}</span></div>
+      <div class="proc-field"><label>Polo Passivo</label><span>${reu.slice(0,45)}${reu.length>45?"…":""}</span></div>
+    </div>
+    ${ult?`<div class="proc-mov"><div class="mov-label">Última movimentação</div>
+      <div class="mov-row">
+        <span class="mov-date">${dData?dData.toLocaleDateString("pt-BR"):"—"}</span>
+        <span class="mov-text">${movDesc}${movComp?" — "+movComp:""}</span>
+      </div></div>`:""}
+    <div class="proc-foot">
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+        <span style="font-size:10px;color:var(--gray-400);">Últ. mov.:</span>
+        <span class="dias-badge ${dClass}">${dLabel}</span>
+        ${p.dataAjuizamento?`<span style="font-size:10px;color:var(--gray-400);">· Ajuizado: ${new Date(p.dataAjuizamento).toLocaleDateString("pt-BR")}</span>`:""}
+      </div>
+      <div style="display:flex;gap:5px;">
+        <button class="btn-action" onclick="copiar('${num}')">📋 N°</button>
+        <button class="btn-action" onclick="abrirTrib('${p._tribunal}')">🔗 Tribunal</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function emptyHTML(t,s) {
+  return `<div class="empty"><div class="empty-icon">⚖️</div><h3>${t}</h3><p>${s}</p></div>`;
+}
+
+function copiar(txt) {
+  navigator.clipboard?.writeText(txt).then(()=>toast("Número copiado!")).catch(()=>prompt("Copie:",txt));
+}
+
+function abrirTrib(trib) {
+  const urls = {
+    STJ:"https://processo.stj.jus.br/processo/pesquisa/",STF:"https://portal.stf.jus.br/processos/",
+    TST:"https://consultaprocessual.tst.jus.br/",
+    TRF1:"https://processual.trf1.jus.br/consultaProcessual/processo.php",
+    TRF2:"https://eproc.trf2.jus.br/eproc2trf2/",TRF3:"https://web.trf3.jus.br/base/csp/apex/f?p=700",
+    TRF4:"https://eproc.trf4.jus.br/eproc2trf4/",TRF5:"https://pje1g.trf5.jus.br/pje/",
+    TRF6:"https://eproc.trf6.jus.br/eproc/",
+    TJPR:"https://projudi.tjpr.jus.br/projudi/",TJSC:"https://esaj.tjsc.jus.br/cpopg/open.do",
+    TJRS:"https://www.tjrs.jus.br/novo/buscas-solr/",TJSP:"https://esaj.tjsp.jus.br/cpopg/open.do",
+    TJRJ:"https://www3.tjrj.jus.br/consultaprocessual/",TJMG:"https://www4.tjmg.jus.br/juridico/sf/proc_resultado2.jsp",
+    TJES:"https://sistemas.tjes.jus.br/ediario/",TJMT:"https://pje.tjmt.jus.br/pje/",
+    TJMS:"https://esaj.tjms.jus.br/cpopg5/open.do",TJGO:"https://projudi.tjgo.jus.br/",
+    TJDFT:"https://www.tjdft.jus.br/consultas/processo/",
+  };
+  const k = Object.keys(urls).find(k=>trib.includes(k));
+  if(k) window.open(urls[k],"_blank");
+  else { const base = trib.toLowerCase().replace("trt","trt").replace("tj","tj"); window.open(`https://pje.${base}.jus.br/consultaprocessual/`,"_blank"); }
+}
+
+function toast(msg) {
+  let t = document.getElementById("_toast");
+  if(!t){ t=document.createElement("div"); t.id="_toast";
+    t.style.cssText="position:fixed;top:18px;right:18px;background:var(--navy);color:var(--white);padding:10px 16px;border-radius:8px;font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:9999;transition:opacity 0.3s;";
+    document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity="1";
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity="0",2800);
+}
+</script>
+</body>
+</html>
