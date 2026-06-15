@@ -4,7 +4,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATAJUD_KEY = 'cDZHYzlZa0JadVREZDJCendFbXNpTT';
+const DATAJUD_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
 
 app.use(cors());
 app.use(express.json());
