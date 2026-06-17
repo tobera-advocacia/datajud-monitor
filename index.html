@@ -327,17 +327,6 @@ const COR_GRUPO = {
   "Estadual — Nordeste":"#6d28d9","Estadual — Norte":"#0369a1"
 };
 const PROXY_URL = "https://tobera-datajud-proxy.onrender.com";
-const CERTIDAO_URLS = {
-  tjpr:  (doc) => `https://projudi.tjpr.jus.br/projudi/publico/certidao.do?_method=pesquisarCertidao&documento=${doc}&tipoDocumento=${doc.length===11?"CPF":"CNPJ"}`,
-  tjsc:  (doc) => `https://esaj.tjsc.jus.br/sco/abrirCadastroConsulta.do?documento=${doc}`,
-  tjrs:  (doc) => `https://www.tjrs.jus.br/novo/certidao/?documento=${doc}`,
-  tjsp:  (doc) => `https://esaj.tjsp.jus.br/sco/abrirCadastroConsulta.do?documento=${doc}`,
-  tjmg:  (doc) => `https://www4.tjmg.jus.br/juridico/sf/certidao.do?documento=${doc}`,
-  trf4:  (doc) => `https://certidao.trf4.jus.br/certidao/emissao?cpfCnpj=${doc}`,
-  trt9:  (doc) => `https://pje.trt9.jus.br/certidao/publico?documento=${doc}`,
-  trt12: (doc) => `https://pje.trt12.jus.br/certidao/publico?documento=${doc}`,
-  trt4:  (doc) => `https://pje.trt4.jus.br/certidao/publico?documento=${doc}`,
-};
 let grupoAtual="chico", entidadesSel=new Set(), tribunaisSel=new Set(["tjpr","trf4","trt9","tjsc","trt12","tjrs","trt4"]);
 let resultados=[], erros=[], loading=false, filtroAtual="todos";
 window.onload=function(){ renderTabs(); switchGrupo("chico"); renderTribunais(); atualizarHeaderCounts(); };
@@ -355,16 +344,7 @@ function toggleTrib(id){ if(tribunaisSel.has(id))tribunaisSel.delete(id); else t
 function marcarTrib(modo){ const pg=(g)=>TRIBUNAIS.filter(t=>t.grupo===g).map(t=>t.id); if(modo==="todos"){TRIBUNAIS.forEach(t=>tribunaisSel.add(t.id));}else if(modo==="limpar"){tribunaisSel.clear();}else if(modo==="sul"){tribunaisSel.clear();[...pg("Estadual — Sul"),...pg("Justiça do Trabalho").filter(id=>["trt4","trt9","trt12"].includes(id)),"trf4"].forEach(id=>tribunaisSel.add(id));}else if(modo==="sudeste"){tribunaisSel.clear();[...pg("Estadual — Sudeste"),"trt1","trt2","trt3","trt15","trt17","trf2","trf3"].forEach(id=>tribunaisSel.add(id));}else if(modo==="co"){tribunaisSel.clear();[...pg("Estadual — Centro-Oeste"),"trt10","trt18","trt23","trt24","trf1"].forEach(id=>tribunaisSel.add(id));}else if(modo==="nordeste"){tribunaisSel.clear();[...pg("Estadual — Nordeste"),"trt5","trt6","trt7","trt13","trt16","trt19","trt20","trt21","trt22","trf5"].forEach(id=>tribunaisSel.add(id));}else if(modo==="norte"){tribunaisSel.clear();[...pg("Estadual — Norte"),"trt8","trt11","trt14","trf1"].forEach(id=>tribunaisSel.add(id));}else if(modo==="trabalho"){tribunaisSel.clear();TRIBUNAIS.filter(t=>t.grupo==="Justiça do Trabalho"||t.id==="tst").forEach(t=>tribunaisSel.add(t.id));}else if(modo==="federal"){tribunaisSel.clear();TRIBUNAIS.filter(t=>t.grupo==="Justiça Federal"||t.grupo==="Superiores").forEach(t=>tribunaisSel.add(t.id));} renderTribunais(); }
 function atualizarLabel(){ document.getElementById("label-doc").textContent=document.getElementById("tipo-manual").value==="cpf"?"CPF (somente números)":"CNPJ (somente números)"; }
 function extrairNumerosProcesso(html){ return [...new Set((html.match(/\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/g)||[]))]; }
-async function certidaoDireta(tribunal,doc){ const getFn=CERTIDAO_URLS[tribunal]; if(!getFn)return[]; try{ const resp=await fetch(getFn(doc),{credentials:"omit",headers:{"Accept":"text/html"}}); if(!resp.ok)return[]; return extrairNumerosProcesso(await resp.text()); }catch(e){return[];} }
-// Busca via Escavador usando sessão logada do Chrome
-async function buscarEscavador(doc) {
-  const tipo = doc.length === 11 ? "cpf" : "cnpj";
-  try {
-    const resp = await fetch(`https://www.escavador.com/${tipo}/${doc}`, { credentials: "include" });
-    if (!resp.ok) return [];
-    return extrairNumerosProcesso(await resp.text());
-  } catch(e) { return []; }
-}
+
 
 async function consultarDatajud(tribunal,doc){ const resp=await fetch(PROXY_URL+"/consultar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tribunal,doc:doc.replace(/\D/g,"")})}); if(!resp.ok)throw new Error(`HTTP ${resp.status}`); const data=await resp.json(); if(data.erro)throw new Error(data.erro); return data.processos||[]; }
 async function consultar(){
@@ -376,8 +356,7 @@ async function consultar(){
   loading=true; resultados=[]; erros=[];
   const btn=document.getElementById("btn-consultar"); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Consultando...';
   document.getElementById("painel-progresso").style.display="";
-  const tribList=Array.from(tribunaisSel); let atual=0; const total=alvos.length*tribList.length;
-  document.getElementById("resultados-area").innerHTML=emptyHTML("Consultando certidões...","Buscando processos por CPF/CNPJ nos portais dos tribunais.");
+    document.getElementById("resultados-area").innerHTML=emptyHTML("Consultando certidões...","Buscando processos por CPF/CNPJ nos portais dos tribunais.");
   for(const alvo of alvos){
     for(const trib of tribList){
       atual++;
@@ -385,7 +364,7 @@ async function consultar(){
       document.getElementById("prog-count").textContent=`${atual} / ${total}`;
       document.getElementById("prog-bar").style.width=`${(atual/total)*100}%`;
       try{
-        const numeros=await certidaoDireta(trib,alvo.doc);
+        const numeros=await 
         if(numeros.length>0){ numeros.forEach(num=>resultados.push({numeroProcesso:num,_entidade:alvo.nome,_doc:alvo.label,_tribunal:trib.toUpperCase()})); continue; }
         const procs=await consultarDatajud(trib,alvo.doc);
         procs.forEach(p=>resultados.push({...p,_entidade:alvo.nome,_doc:alvo.label,_tribunal:trib.toUpperCase()}));
