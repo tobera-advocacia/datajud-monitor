@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+<head><meta charset="UTF-8"><title>Copiar index.html</title>
+<style>
+body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #0f1f3d; color: white; gap: 20px; }
+.btn { background: #c9a84c; color: #0f1f3d; border: none; border-radius: 8px; padding: 16px 32px; font-size: 18px; font-weight: 700; cursor: pointer; }
+.btn:hover { background: #e8c870; }
+.status { font-size: 14px; color: #c9a84c; }
+</style>
+</head>
+<body>
+<div style="font-size:24px;font-weight:700;">📋 Tobera Monitor — Copiar index.html</div>
+<div class="status" id="status">Clique no botão para copiar o novo index.html</div>
+<button class="btn" onclick="copiar()">Copiar conteúdo do index.html</button>
+<div style="font-size:12px;color:#8b92a8;text-align:center;max-width:400px;">
+  Após copiar, vá ao GitHub, abra o index.html para edição,<br>
+  selecione tudo (Ctrl+A), apague e cole (Ctrl+V).
+</div>
+<script>
+const conteudo = `<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -389,7 +408,7 @@ window.onload = function() {
 function atualizarHeaderCounts() {
   const total = Object.values(GRUPOS).reduce((s,g) => s + g.entidades.length, 0);
   document.getElementById("hdr-counts").textContent =
-    `${total} documentos · ${Object.keys(GRUPOS).length - 1} grupos`;
+    \`\${total} documentos · \${Object.keys(GRUPOS).length - 1} grupos\`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -397,9 +416,9 @@ function atualizarHeaderCounts() {
 // ═══════════════════════════════════════════════════════════════════
 function renderTabs() {
   const container = document.getElementById("tabs-container");
-  container.innerHTML = Object.entries(GRUPOS).map(([id, g]) => `
-    <button class="tab ${id === grupoAtual ? 'active' : ''}" onclick="switchGrupo('${id}')">${g.label}</button>
-  `).join("");
+  container.innerHTML = Object.entries(GRUPOS).map(([id, g]) => \`
+    <button class="tab \${id === grupoAtual ? 'active' : ''}" onclick="switchGrupo('\${id}')">\${g.label}</button>
+  \`).join("");
 }
 
 function switchGrupo(id) {
@@ -412,14 +431,14 @@ function switchGrupo(id) {
   if (!isManual) {
     entidadesSel = new Set(g.entidades.map(e => e.doc));
     document.getElementById("ent-titulo").textContent = g.label.replace(/^⬡ /, "");
-    document.getElementById("ent-sub").textContent = `${g.entidades.length} entidades — todas selecionadas`;
+    document.getElementById("ent-sub").textContent = \`\${g.entidades.length} entidades — todas selecionadas\`;
   }
   renderEntidades();
   document.getElementById("resultados-area").innerHTML = emptyHTML(
     isManual ? "Consulta Avulsa" : g.label,
     isManual
       ? "Informe o CPF ou CNPJ, selecione os tribunais e consulte."
-      : `${g.entidades.length} entidades prontas. Selecione os tribunais e clique em Consultar DataJud.`
+      : \`\${g.entidades.length} entidades prontas. Selecione os tribunais e clique em Consultar DataJud.\`
   );
 }
 
@@ -431,14 +450,14 @@ function renderEntidades() {
   const g = GRUPOS[grupoAtual];
   if (!g || g.entidades.length === 0) { list.innerHTML = ""; return; }
 
-  list.innerHTML = g.entidades.map(e => `
-    <div class="entidade-item ${entidadesSel.has(e.doc) ? 'checked' : ''}" onclick="toggleEnt('${e.doc}')">
-      <div class="check-box">${entidadesSel.has(e.doc) ? '✓' : ''}</div>
+  list.innerHTML = g.entidades.map(e => \`
+    <div class="entidade-item \${entidadesSel.has(e.doc) ? 'checked' : ''}" onclick="toggleEnt('\${e.doc}')">
+      <div class="check-box">\${entidadesSel.has(e.doc) ? '✓' : ''}</div>
       <div style="min-width:0;">
-        <div class="ent-nome">${e.icon} ${e.nome}</div>
-        <div class="ent-doc">${e.tipo.toUpperCase()} ${e.label}${e.sub ? ' · ' + e.sub : ''}</div>
+        <div class="ent-nome">\${e.icon} \${e.nome}</div>
+        <div class="ent-doc">\${e.tipo.toUpperCase()} \${e.label}\${e.sub ? ' · ' + e.sub : ''}</div>
       </div>
-    </div>`).join("");
+    </div>\`).join("");
 
   document.getElementById("ent-counter").textContent = entidadesSel.size + "/" + g.entidades.length;
 }
@@ -476,13 +495,13 @@ function renderTribunais() {
   let html = "";
   Object.entries(grupos).forEach(([nome, lista]) => {
     const cor = COR_GRUPO[nome] || "#4a5068";
-    html += `<div class="trib-section">
-      <span class="trib-section-label" style="color:${cor};">${nome}</span>
+    html += \`<div class="trib-section">
+      <span class="trib-section-label" style="color:\${cor};">\${nome}</span>
       <div class="trib-chips-row">
-        ${lista.map(t => `<button class="trib-chip ${tribunaisSel.has(t.id)?'sel':''}"
-          title="${t.full}" onclick="toggleTrib('${t.id}')">${t.label}</button>`).join("")}
+        \${lista.map(t => \`<button class="trib-chip \${tribunaisSel.has(t.id)?'sel':''}"
+          title="\${t.full}" onclick="toggleTrib('\${t.id}')">\${t.label}</button>\`).join("")}
       </div>
-    </div>`;
+    </div>\`;
   });
   container.innerHTML = html;
   document.getElementById("trib-counter").textContent = tribunaisSel.size + "/" + TRIBUNAIS.length;
@@ -514,17 +533,67 @@ function atualizarLabel() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// CONSULTA DATAJUD — via proxy (resolve CORS)
+// CONFIGURAÇÃO
 // ═══════════════════════════════════════════════════════════════════
-const PROXY_URL = "https://tobera-datajud-proxy.onrender.com/consultar";
+const PROXY_URL = "https://tobera-datajud-proxy.onrender.com";
 
+// ── Certidões: acesso direto pelo navegador (IP brasileiro, sem bloqueio) ──
+const CERTIDAO_URLS = {
+  tjpr:  (doc) => \`https://projudi.tjpr.jus.br/projudi/publico/certidao.do?_method=pesquisarCertidao&documento=\${doc}&tipoDocumento=\${doc.length===11?"CPF":"CNPJ"}\`,
+  tjsc:  (doc) => \`https://esaj.tjsc.jus.br/sco/abrirCadastroConsulta.do?documento=\${doc}\`,
+  tjrs:  (doc) => \`https://www.tjrs.jus.br/novo/certidao/?documento=\${doc}\`,
+  tjsp:  (doc) => \`https://esaj.tjsp.jus.br/sco/abrirCadastroConsulta.do?documento=\${doc}\`,
+  tjmg:  (doc) => \`https://www4.tjmg.jus.br/juridico/sf/certidao.do?documento=\${doc}\`,
+  trf4:  (doc) => \`https://certidao.trf4.jus.br/certidao/emissao?cpfCnpj=\${doc}\`,
+  trt9:  (doc) => \`https://pje.trt9.jus.br/certidao/publico?documento=\${doc}\`,
+  trt12: (doc) => \`https://pje.trt12.jus.br/certidao/publico?documento=\${doc}\`,
+  trt4:  (doc) => \`https://pje.trt4.jus.br/certidao/publico?documento=\${doc}\`,
+};
+
+function extrairNumerosProcesso(html) {
+  const regex = /\\d{7}-\\d{2}\\.\\d{4}\\.\\d\\.\\d{2}\\.\\d{4}/g;
+  return [...new Set(html.match(regex) || [])];
+}
+
+// Busca certidão diretamente pelo navegador
+async function certidaoDireta(tribunal, doc) {
+  const getFn = CERTIDAO_URLS[tribunal];
+  if (!getFn) return [];
+  try {
+    const url = getFn(doc);
+    const resp = await fetch(url, {
+      method: "GET",
+      credentials: "omit",
+      headers: { "Accept": "text/html" }
+    });
+    if (!resp.ok) return [];
+    const html = await resp.text();
+    return extrairNumerosProcesso(html);
+  } catch(e) { return []; }
+}
+
+// Busca detalhes de um processo no DataJud via proxy
+async function detalhesProcesso(numero, tribunal) {
+  try {
+    const resp = await fetch(PROXY_URL + "/consultar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tribunal: tribunal.toLowerCase(), doc: numero, modo: "numero" })
+    });
+    if (!resp.ok) return { numeroProcesso: numero, _tribunal: tribunal };
+    const data = await resp.json();
+    return data.processos?.[0] || { numeroProcesso: numero, _tribunal: tribunal };
+  } catch(e) { return { numeroProcesso: numero, _tribunal: tribunal }; }
+}
+
+// Fallback DataJud por CPF/CNPJ via proxy
 async function consultarDatajud(tribunal, doc) {
-  const resp = await fetch(PROXY_URL, {
+  const resp = await fetch(PROXY_URL + "/consultar", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tribunal, doc: doc.replace(/\D/g,"") })
+    body: JSON.stringify({ tribunal, doc: doc.replace(/\\D/g,"") })
   });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  if (!resp.ok) throw new Error(\`HTTP \${resp.status}\`);
   const data = await resp.json();
   if (data.erro) throw new Error(data.erro);
   return data.processos || [];
@@ -535,7 +604,7 @@ async function consultar() {
 
   let alvos = [];
   if (grupoAtual === "manual") {
-    const doc  = document.getElementById("doc-manual").value.replace(/\D/g,"");
+    const doc  = document.getElementById("doc-manual").value.replace(/\\D/g,"");
     const tipo = document.getElementById("tipo-manual").value;
     const nome = document.getElementById("nome-manual").value.trim() || doc;
     if (!doc) { toast("Informe o CPF ou CNPJ."); return; }
@@ -554,22 +623,44 @@ async function consultar() {
   document.getElementById("painel-progresso").style.display = "";
 
   const tribList = Array.from(tribunaisSel);
-  const total = alvos.length * tribList.length;
   let atual = 0;
+  const total = alvos.length * tribList.length;
 
-  document.getElementById("resultados-area").innerHTML = emptyHTML("Consultando tribunais...", "Aguarde enquanto buscamos nos tribunais selecionados.");
+  document.getElementById("resultados-area").innerHTML = emptyHTML(
+    "Consultando certidões...",
+    "Buscando processos por CPF/CNPJ nos portais dos tribunais. Isso pode levar alguns instantes."
+  );
 
   for (const alvo of alvos) {
     for (const trib of tribList) {
       atual++;
-      document.getElementById("prog-msg").textContent = `${trib.toUpperCase()} — ${alvo.nome}`;
-      document.getElementById("prog-count").textContent = `${atual} / ${total}`;
-      document.getElementById("prog-bar").style.width = `${(atual/total)*100}%`;
+      document.getElementById("prog-msg").textContent = \`\${trib.toUpperCase()} — \${alvo.nome}\`;
+      document.getElementById("prog-count").textContent = \`\${atual} / \${total}\`;
+      document.getElementById("prog-bar").style.width = \`\${(atual/total)*100}%\`;
+
       try {
-        const procs = await consultarDatajud(trib, alvo.doc);
+        // 1. Tenta certidão direta pelo navegador
+        const temCertidao = !!CERTIDAO_URLS[trib];
+        let procs = [];
+
+        if (temCertidao) {
+          const numeros = await certidaoDireta(trib, alvo.doc);
+          if (numeros.length > 0) {
+            // Encontrou processos na certidão — busca detalhes no DataJud
+            for (const num of numeros) {
+              const detalhe = await detalhesProcesso(num, trib.toUpperCase());
+              resultados.push({...detalhe, _entidade: alvo.nome, _doc: alvo.label, _tribunal: trib.toUpperCase()});
+            }
+            continue;
+          }
+        }
+
+        // 2. Fallback: DataJud via proxy
+        procs = await consultarDatajud(trib, alvo.doc);
         procs.forEach(p => resultados.push({...p, _entidade:alvo.nome, _doc:alvo.label, _tribunal:trib.toUpperCase()}));
+
       } catch(e) {
-        erros.push(`${alvo.nome} / ${trib.toUpperCase()}: ${e.message}`);
+        erros.push(\`\${alvo.nome} / \${trib.toUpperCase()}: \${e.message}\`);
       }
     }
   }
@@ -604,26 +695,26 @@ function renderResultados(filtro) {
   let html = "";
 
   if (resultados.length > 0) {
-    html += `<div class="stats-row">
-      ${[
+    html += \`<div class="stats-row">
+      \${[
         {label:"Processos",val:resultados.length,color:"var(--navy)"},
         {label:"Tribunais",val:tribunais,color:"var(--blue)"},
         {label:"Entidades",val:entidades,color:"var(--gold)"},
         {label:"Últ. 30 dias",val:recentes,color:"var(--green)"},
-      ].map(s=>`<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value" style="color:${s.color}">${s.val}</div></div>`).join("")}
+      ].map(s=>\`<div class="stat-card"><div class="stat-label">\${s.label}</div><div class="stat-value" style="color:\${s.color}">\${s.val}</div></div>\`).join("")}
     </div>
     <div class="filtros">
-      <button class="filtro-btn ${filtroAtual==='todos'?'active':''}" onclick="renderResultados('todos')">Todos (${resultados.length})</button>
-      <button class="filtro-btn ${filtroAtual==='recente'?'active':''}" onclick="renderResultados('recente')">Últ. 30 dias (${recentes})</button>
-      <button class="filtro-btn ${filtroAtual==='ativo'?'active':''}" onclick="renderResultados('ativo')">Ativos 6 meses</button>
-    </div>`;
+      <button class="filtro-btn \${filtroAtual==='todos'?'active':''}" onclick="renderResultados('todos')">Todos (\${resultados.length})</button>
+      <button class="filtro-btn \${filtroAtual==='recente'?'active':''}" onclick="renderResultados('recente')">Últ. 30 dias (\${recentes})</button>
+      <button class="filtro-btn \${filtroAtual==='ativo'?'active':''}" onclick="renderResultados('ativo')">Ativos 6 meses</button>
+    </div>\`;
   }
 
   if (erros.length) {
-    html += `<div class="erros-box"><div class="erros-title">⚠ ${erros.length} erro(s) — demais resultados foram processados</div>
-      ${erros.slice(0,10).map(e=>`<div class="erros-item">• ${e}</div>`).join("")}
-      ${erros.length>10?`<div class="erros-item">... e mais ${erros.length-10} erros</div>`:""}
-    </div>`;
+    html += \`<div class="erros-box"><div class="erros-title">⚠ \${erros.length} erro(s) — demais resultados foram processados</div>
+      \${erros.slice(0,10).map(e=>\`<div class="erros-item">• \${e}</div>\`).join("")}
+      \${erros.length>10?\`<div class="erros-item">... e mais \${erros.length-10} erros</div>\`:""}
+    </div>\`;
   }
 
   if (!resultados.length && !erros.length) { html += emptyHTML("Nenhum processo encontrado","Tente outros tribunais ou verifique o documento."); }
@@ -639,7 +730,7 @@ function cardProc(p) {
   const dData = ult?.dataHora ? new Date(ult.dataHora) : null;
   const dias = dData ? Math.floor((Date.now()-dData)/86400000) : null;
   const dClass = dias===null?"dias-gray":dias<=0?"dias-red":dias<=30?"dias-yellow":"dias-green";
-  const dLabel = dias===null?"—":dias===0?"Hoje":`${dias}d atrás`;
+  const dLabel = dias===null?"—":dias===0?"Hoje":\`\${dias}d atrás\`;
   const classe  = p.classe?.nome||p.classe||"—";
   const assunto = Array.isArray(p.assunto)?p.assunto.map(a=>a.nome||a).join(", "):(p.assunto?.nome||p.assunto||"—");
   const orgao   = p.orgaoJulgador?.nome||"—";
@@ -651,43 +742,43 @@ function cardProc(p) {
   const movDesc = ult?.nome||ult?.descricao||"Movimentação registrada";
   const movComp = ult?.complementosTabelados?.[0]?.descricao||"";
 
-  return `<div class="proc-card">
+  return \`<div class="proc-card">
     <div class="proc-head">
       <div style="flex:1;min-width:0;">
-        <div class="proc-num">${num}</div>
-        <div class="proc-assunto">${classe}${assunto!=="—"?" · "+assunto.slice(0,70):""}</div>
+        <div class="proc-num">\${num}</div>
+        <div class="proc-assunto">\${classe}\${assunto!=="—"?" · "+assunto.slice(0,70):""}</div>
       </div>
       <div class="proc-badges">
-        <span class="badge-trib">${p._tribunal}</span>
-        <span class="badge-ent">${entS}</span>
+        <span class="badge-trib">\${p._tribunal}</span>
+        <span class="badge-ent">\${entS}</span>
       </div>
     </div>
     <div class="proc-body">
-      <div class="proc-field"><label>Órgão Julgador</label><span>${orgao.slice(0,45)}</span></div>
-      <div class="proc-field"><label>Polo Ativo</label><span>${autor.slice(0,45)}${autor.length>45?"…":""}</span></div>
-      <div class="proc-field"><label>Polo Passivo</label><span>${reu.slice(0,45)}${reu.length>45?"…":""}</span></div>
+      <div class="proc-field"><label>Órgão Julgador</label><span>\${orgao.slice(0,45)}</span></div>
+      <div class="proc-field"><label>Polo Ativo</label><span>\${autor.slice(0,45)}\${autor.length>45?"…":""}</span></div>
+      <div class="proc-field"><label>Polo Passivo</label><span>\${reu.slice(0,45)}\${reu.length>45?"…":""}</span></div>
     </div>
-    ${ult?`<div class="proc-mov"><div class="mov-label">Última movimentação</div>
+    \${ult?\`<div class="proc-mov"><div class="mov-label">Última movimentação</div>
       <div class="mov-row">
-        <span class="mov-date">${dData?dData.toLocaleDateString("pt-BR"):"—"}</span>
-        <span class="mov-text">${movDesc}${movComp?" — "+movComp:""}</span>
-      </div></div>`:""}
+        <span class="mov-date">\${dData?dData.toLocaleDateString("pt-BR"):"—"}</span>
+        <span class="mov-text">\${movDesc}\${movComp?" — "+movComp:""}</span>
+      </div></div>\`:""}
     <div class="proc-foot">
       <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
         <span style="font-size:10px;color:var(--gray-400);">Últ. mov.:</span>
-        <span class="dias-badge ${dClass}">${dLabel}</span>
-        ${p.dataAjuizamento?`<span style="font-size:10px;color:var(--gray-400);">· Ajuizado: ${new Date(p.dataAjuizamento).toLocaleDateString("pt-BR")}</span>`:""}
+        <span class="dias-badge \${dClass}">\${dLabel}</span>
+        \${p.dataAjuizamento?\`<span style="font-size:10px;color:var(--gray-400);">· Ajuizado: \${new Date(p.dataAjuizamento).toLocaleDateString("pt-BR")}</span>\`:""}
       </div>
       <div style="display:flex;gap:5px;">
-        <button class="btn-action" onclick="copiar('${num}')">📋 N°</button>
-        <button class="btn-action" onclick="abrirTrib('${p._tribunal}')">🔗 Tribunal</button>
+        <button class="btn-action" onclick="copiar('\${num}')">📋 N°</button>
+        <button class="btn-action" onclick="abrirTrib('\${p._tribunal}')">🔗 Tribunal</button>
       </div>
     </div>
-  </div>`;
+  </div>\`;
 }
 
 function emptyHTML(t,s) {
-  return `<div class="empty"><div class="empty-icon">⚖️</div><h3>${t}</h3><p>${s}</p></div>`;
+  return \`<div class="empty"><div class="empty-icon">⚖️</div><h3>\${t}</h3><p>\${s}</p></div>\`;
 }
 
 function copiar(txt) {
@@ -711,7 +802,7 @@ function abrirTrib(trib) {
   };
   const k = Object.keys(urls).find(k=>trib.includes(k));
   if(k) window.open(urls[k],"_blank");
-  else { const base = trib.toLowerCase().replace("trt","trt").replace("tj","tj"); window.open(`https://pje.${base}.jus.br/consultaprocessual/`,"_blank"); }
+  else { const base = trib.toLowerCase().replace("trt","trt").replace("tj","tj"); window.open(\`https://pje.\${base}.jus.br/consultaprocessual/\`,"_blank"); }
 }
 
 function toast(msg) {
@@ -722,6 +813,29 @@ function toast(msg) {
   t.textContent=msg; t.style.opacity="1";
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity="0",2800);
 }
+</script>
+</body>
+</html>
+`;
+async function copiar() {
+  try {
+    await navigator.clipboard.writeText(conteudo);
+    document.getElementById('status').textContent = '✅ Copiado! ' + conteudo.length + ' caracteres. Agora cole no GitHub.';
+    document.getElementById('status').style.color = '#1a7a4a';
+  } catch(e) {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = conteudo;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('status').textContent = '✅ Copiado via fallback! Agora cole no GitHub.';
+    document.getElementById('status').style.color = '#1a7a4a';
+  }
+}
+// Tenta copiar automaticamente ao abrir
+window.onload = () => copiar();
 </script>
 </body>
 </html>
