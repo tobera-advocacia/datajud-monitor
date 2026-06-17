@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tobera — Consultor Escavador </title>
+<title>Tobera — Consultor DataJud Nacional</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #1e2433; font-size: 13px; min-height: 100vh; }
@@ -118,7 +118,7 @@ body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #
     <div class="header-brand">
       <div class="logo">T</div>
       <div>
-        <div class="header-title">Tobera Advocacia — Consultor Escavador</div>
+        <div class="header-title">Tobera Advocacia — Consultor DataJud Nacional</div>
         <div class="header-sub">API Pública CNJ · Todos os Tribunais do Brasil · Tempo Real</div>
       </div>
     </div>
@@ -131,7 +131,7 @@ body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #
 <div class="main">
   <div class="tabs" id="tabs-container"></div>
   <div class="aviso" id="aviso-top">
-    ℹ <strong>Como usar:</strong> Selecione o grupo de cliente na aba, marque os tribunais e clique em <strong>⚡ Consultar Escavador</strong>. A consulta vai diretamente ao CNJ — sem intermediários. Certifique-se de estar conectado à internet.
+    ℹ <strong>Como usar:</strong> Selecione o grupo de cliente na aba, marque os tribunais e clique em <strong>⚡ Consultar DataJud</strong>. A consulta vai diretamente ao CNJ — sem intermediários. Certifique-se de estar conectado à internet.
   </div>
   <div class="grid">
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -199,7 +199,7 @@ body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #
         </div>
         <div class="trib-scroll" id="trib-chips"></div>
       </div>
-      <button class="btn-primary" id="btn-consultar" onclick="consultar()">⚡ Consultar Escavador</button>
+      <button class="btn-primary" id="btn-consultar" onclick="consultar()">⚡ Consultar DataJud</button>
       <div id="painel-progresso" style="display:none;" class="card">
         <div class="card-body">
           <div style="font-size:11px;color:var(--gray-600);" id="prog-msg">Iniciando...</div>
@@ -212,7 +212,7 @@ body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #
       <div class="empty">
         <div class="empty-icon">⚖️</div>
         <h3>Selecione um grupo e consulte</h3>
-        <p>Escolha a aba do cliente, selecione os tribunais e clique em Consultar Escavador para rastrear processos em todo o Brasil.</p>
+        <p>Escolha a aba do cliente, selecione os tribunais e clique em Consultar DataJud para rastrear processos em todo o Brasil.</p>
       </div>
     </div>
   </div>
@@ -343,7 +343,7 @@ let resultados=[], erros=[], loading=false, filtroAtual="todos";
 window.onload=function(){ renderTabs(); switchGrupo("chico"); renderTribunais(); atualizarHeaderCounts(); };
 function atualizarHeaderCounts(){ const t=Object.values(GRUPOS).reduce((s,g)=>s+g.entidades.length,0); document.getElementById("hdr-counts").textContent=`${t} documentos · ${Object.keys(GRUPOS).length-1} grupos`; }
 function renderTabs(){ document.getElementById("tabs-container").innerHTML=Object.entries(GRUPOS).map(([id,g])=>`<button class="tab ${id===grupoAtual?'active':''}" onclick="switchGrupo('${id}')">${g.label}</button>`).join(""); }
-function switchGrupo(id){ grupoAtual=id; renderTabs(); const isM=id==="manual"; document.getElementById("painel-manual").style.display=isM?"":"none"; const g=GRUPOS[id]; if(!isM){ entidadesSel=new Set(g.entidades.map(e=>e.doc)); document.getElementById("ent-titulo").textContent=g.label.replace(/^⬡ /,""); document.getElementById("ent-sub").textContent=`${g.entidades.length} entidades — todas selecionadas`; } renderEntidades(); document.getElementById("resultados-area").innerHTML=emptyHTML(isM?"Consulta Avulsa":g.label,isM?"Informe o CPF ou CNPJ, selecione os tribunais e consulte.":`${g.entidades.length} entidades prontas. Selecione os tribunais e clique em Consultar Escavador.`); }
+function switchGrupo(id){ grupoAtual=id; renderTabs(); const isM=id==="manual"; document.getElementById("painel-manual").style.display=isM?"":"none"; const g=GRUPOS[id]; if(!isM){ entidadesSel=new Set(g.entidades.map(e=>e.doc)); document.getElementById("ent-titulo").textContent=g.label.replace(/^⬡ /,""); document.getElementById("ent-sub").textContent=`${g.entidades.length} entidades — todas selecionadas`; } renderEntidades(); document.getElementById("resultados-area").innerHTML=emptyHTML(isM?"Consulta Avulsa":g.label,isM?"Informe o CPF ou CNPJ, selecione os tribunais e consulte.":`${g.entidades.length} entidades prontas. Selecione os tribunais e clique em Consultar DataJud.`); }
 function renderEntidades(){ const list=document.getElementById("entidades-list"); const g=GRUPOS[grupoAtual]; if(!g||!g.entidades.length){list.innerHTML="";return;} list.innerHTML=g.entidades.map(e=>`<div class="entidade-item ${entidadesSel.has(e.doc)?'checked':''}" onclick="toggleEnt('${e.doc}')"><div class="check-box">${entidadesSel.has(e.doc)?'✓':''}</div><div style="min-width:0;"><div class="ent-nome">${e.icon} ${e.nome}</div><div class="ent-doc">${e.tipo.toUpperCase()} ${e.label}${e.sub?' · '+e.sub:''}</div></div></div>`).join(""); document.getElementById("ent-counter").textContent=entidadesSel.size+"/"+g.entidades.length; }
 function toggleEnt(doc){ if(entidadesSel.has(doc))entidadesSel.delete(doc); else entidadesSel.add(doc); renderEntidades(); }
 function marcarTodasEnt(){ GRUPOS[grupoAtual].entidades.forEach(e=>entidadesSel.add(e.doc)); renderEntidades(); }
@@ -377,12 +377,12 @@ async function consultar(){
       try{
         const numeros=await certidaoDireta(trib,alvo.doc);
         if(numeros.length>0){ numeros.forEach(num=>resultados.push({numeroProcesso:num,_entidade:alvo.nome,_doc:alvo.label,_tribunal:trib.toUpperCase()})); continue; }
-        const procs=await Consultar Escavador(trib,alvo.doc);
+        const procs=await consultarDatajud(trib,alvo.doc);
         procs.forEach(p=>resultados.push({...p,_entidade:alvo.nome,_doc:alvo.label,_tribunal:trib.toUpperCase()}));
       }catch(e){ erros.push(`${alvo.nome} / ${trib.toUpperCase()}: ${e.message}`); }
     }
   }
-  loading=false; btn.disabled=false; btn.innerHTML="⚡ Consultar Escavador";
+  loading=false; btn.disabled=false; btn.innerHTML="⚡ Consultar DataJud";
   document.getElementById("painel-progresso").style.display="none";
   renderResultados("todos");
 }
