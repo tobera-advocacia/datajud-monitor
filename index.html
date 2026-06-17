@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tobera — Consultor DataJud Nacional</title>
+<title>Tobera — Monitor Escavador</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #1e2433; font-size: 13px; min-height: 100vh; }
@@ -118,7 +118,7 @@ body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #
     <div class="header-brand">
       <div class="logo">T</div>
       <div>
-        <div class="header-title">Tobera Advocacia — Consultor DataJud Nacional</div>
+        <div class="header-title">Tobera Advocacia — Monitor Escavador</div>
         <div class="header-sub">API Pública CNJ · Todos os Tribunais do Brasil · Tempo Real</div>
       </div>
     </div>
@@ -131,7 +131,7 @@ body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #
 <div class="main">
   <div class="tabs" id="tabs-container"></div>
   <div class="aviso" id="aviso-top">
-    ℹ <strong>Como usar:</strong> Selecione o grupo de cliente na aba, marque os tribunais e clique em <strong>⚡ Consultar DataJud</strong>. A consulta vai diretamente ao CNJ — sem intermediários. Certifique-se de estar conectado à internet.
+    ℹ <strong>Como usar:</strong> Selecione o grupo de cliente na aba, marque os tribunais e clique em <strong>⚡ Consultar Escavador</strong>. A consulta vai diretamente ao CNJ — sem intermediários. Certifique-se de estar conectado à internet.
   </div>
   <div class="grid">
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -199,7 +199,7 @@ body { font-family: 'Segoe UI', Inter, sans-serif; background: #f8f9fb; color: #
         </div>
         <div class="trib-scroll" id="trib-chips"></div>
       </div>
-      <button class="btn-primary" id="btn-consultar" onclick="consultar()">⚡ Consultar DataJud</button>
+      <button class="btn-primary" id="btn-consultar" onclick="consultar()">⚡ Consultar Escavador</button>
       <div id="painel-progresso" style="display:none;" class="card">
         <div class="card-body">
           <div style="font-size:11px;color:var(--gray-600);" id="prog-msg">Iniciando...</div>
@@ -356,6 +356,16 @@ function marcarTrib(modo){ const pg=(g)=>TRIBUNAIS.filter(t=>t.grupo===g).map(t=
 function atualizarLabel(){ document.getElementById("label-doc").textContent=document.getElementById("tipo-manual").value==="cpf"?"CPF (somente números)":"CNPJ (somente números)"; }
 function extrairNumerosProcesso(html){ return [...new Set((html.match(/\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/g)||[]))]; }
 async function certidaoDireta(tribunal,doc){ const getFn=CERTIDAO_URLS[tribunal]; if(!getFn)return[]; try{ const resp=await fetch(getFn(doc),{credentials:"omit",headers:{"Accept":"text/html"}}); if(!resp.ok)return[]; return extrairNumerosProcesso(await resp.text()); }catch(e){return[];} }
+// Busca via Escavador usando sessão logada do Chrome
+async function buscarEscavador(doc) {
+  const tipo = doc.length === 11 ? "cpf" : "cnpj";
+  try {
+    const resp = await fetch(`https://www.escavador.com/${tipo}/${doc}`, { credentials: "include" });
+    if (!resp.ok) return [];
+    return extrairNumerosProcesso(await resp.text());
+  } catch(e) { return []; }
+}
+
 async function consultarDatajud(tribunal,doc){ const resp=await fetch(PROXY_URL+"/consultar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tribunal,doc:doc.replace(/\D/g,"")})}); if(!resp.ok)throw new Error(`HTTP ${resp.status}`); const data=await resp.json(); if(data.erro)throw new Error(data.erro); return data.processos||[]; }
 async function consultar(){
   if(loading)return;
@@ -382,7 +392,7 @@ async function consultar(){
       }catch(e){ erros.push(`${alvo.nome} / ${trib.toUpperCase()}: ${e.message}`); }
     }
   }
-  loading=false; btn.disabled=false; btn.innerHTML="⚡ Consultar DataJud";
+  loading=false; btn.disabled=false; btn.innerHTML="⚡ Consultar Escavador";
   document.getElementById("painel-progresso").style.display="none";
   renderResultados("todos");
 }
