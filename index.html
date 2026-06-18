@@ -347,6 +347,50 @@ function extrairNumerosProcesso(html){ return [...new Set((html.match(/\d{7}-\d{
 
 
 
+async function consultar(){
+  if(loading)return;
+  let alvos=[];
+  if(grupoAtual==="manual"){
+    const doc=document.getElementById("doc-manual").value.replace(/\D/g,"");
+    const tipo=document.getElementById("tipo-manual").value;
+    const nome=document.getElementById("nome-manual").value.trim()||doc;
+    if(!doc){toast("Informe o CPF ou CNPJ.");return;}
+    alvos=[{nome,doc,tipo,label:doc,icon:tipo==="cpf"?"👤":"🏢"}];
+  } else {
+    const g=GRUPOS[grupoAtual];
+    alvos=g.entidades.filter(e=>entidadesSel.has(e.doc));
+    if(!alvos.length){toast("Selecione ao menos uma entidade.");return;}
+  }
+  loading=true; resultados=[]; erros=[];
+  const btn=document.getElementById("btn-consultar");
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Consultando Escavador...';
+  document.getElementById("painel-progresso").style.display="";
+  const total=alvos.length;
+  let atual=0;
+  document.getElementById("resultados-area").innerHTML=emptyHTML("Consultando Escavador...","Buscando processos com sua sessão logada. Aguarde.");
+  for(const alvo of alvos){
+    atual++;
+    document.getElementById("prog-msg").textContent=`Buscando: ${alvo.nome}`;
+    document.getElementById("prog-count").textContent=`${atual} / ${total}`;
+    document.getElementById("prog-bar").style.width=`${(atual/total)*100}%`;
+    try{
+      const tipo=alvo.doc.length===11?"cpf":"cnpj";
+      const resp=await fetch(`https://www.escavador.com/${tipo}/${alvo.doc}`,{credentials:"include"});
+      if(resp.ok){
+        const txt=await resp.text();
+        const nums=[...new Set((txt.match(/\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/g)||[]))];
+        nums.forEach(n=>resultados.push({numeroProcesso:n,_entidade:alvo.nome,_doc:alvo.label,_tribunal:"ESCAVADOR"}));
+      } else {
+        erros.push(`${alvo.nome}: HTTP ${resp.status}`);
+      }
+    }catch(e){erros.push(`${alvo.nome}: ${e.message}`);}
+  }
+  loading=false;
+  btn.disabled=false; btn.innerHTML="⚡ Consultar Escavador";
+  document.getElementById("painel-progresso").style.display="none";
+  renderResultados("todos");
+}
+
 function renderResultados(filtro){ filtroAtual=filtro||filtroAtual; const area=document.getElementById("resultados-area"); const filtrados=resultados.filter(r=>{ if(filtroAtual==="todos")return true; const mov=r.movimentos?.[0]; const data=mov?.dataHora?new Date(mov.dataHora):null; const dias=data?Math.floor((Date.now()-data)/86400000):999; if(filtroAtual==="recente")return dias<=30; if(filtroAtual==="ativo")return dias<=180; return true; }); const tribunais=[...new Set(resultados.map(r=>r._tribunal))].length; const entidades=[...new Set(resultados.map(r=>r._entidade))].length; const recentes=resultados.filter(r=>{const m=r.movimentos?.[0];const d=m?.dataHora?new Date(m.dataHora):null;return d&&Math.floor((Date.now()-d)/86400000)<=30;}).length; let html=""; if(resultados.length>0){html+=`<div class="stats-row">${[{label:"Processos",val:resultados.length,color:"var(--navy)"},{label:"Tribunais",val:tribunais,color:"var(--blue)"},{label:"Entidades",val:entidades,color:"var(--gold)"},{label:"Últ. 30 dias",val:recentes,color:"var(--green)"}].map(s=>`<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value" style="color:${s.color}">${s.val}</div></div>`).join("")}</div><div class="filtros"><button class="filtro-btn ${filtroAtual==='todos'?'active':''}" onclick="renderResultados('todos')">Todos (${resultados.length})</button><button class="filtro-btn ${filtroAtual==='recente'?'active':''}" onclick="renderResultados('recente')">Últ. 30 dias (${recentes})</button><button class="filtro-btn ${filtroAtual==='ativo'?'active':''}" onclick="renderResultados('ativo')">Ativos 6 meses</button></div>`;} if(erros.length){html+=`<div class="erros-box"><div class="erros-title">⚠ ${erros.length} erro(s)</div>${erros.slice(0,10).map(e=>`<div class="erros-item">• ${e}</div>`).join("")}</div>`;} if(!resultados.length&&!erros.length){html+=emptyHTML("Nenhum processo encontrado","Tente outros tribunais ou verifique o documento.");} if(!resultados.length&&erros.length){html+=emptyHTML("Consulta concluída com erros","Pode ser instabilidade nos tribunais — tente novamente.");} filtrados.forEach(p=>{html+=cardProc(p);}); area.innerHTML=html; }
 function cardProc(p){ const movs=p.movimentos||[]; const ult=movs[0]; const dData=ult?.dataHora?new Date(ult.dataHora):null; const dias=dData?Math.floor((Date.now()-dData)/86400000):null; const dClass=dias===null?"dias-gray":dias<=0?"dias-red":dias<=30?"dias-yellow":"dias-green"; const dLabel=dias===null?"—":dias===0?"Hoje":`${dias}d atrás`; const classe=p.classe?.nome||p.classe||"—"; const assunto=Array.isArray(p.assunto)?p.assunto.map(a=>a.nome||a).join(", "):(p.assunto?.nome||p.assunto||"—"); const orgao=p.orgaoJulgador?.nome||"—"; const partes=p.partes||[]; const autor=partes.find(pt=>["AT","ATIVO"].includes(pt.polo))?.nome||"—"; const reu=partes.find(pt=>["PA","PASSIVO"].includes(pt.polo))?.nome||"—"; const num=p.numeroProcesso||"N° não disponível"; const entS=p._entidade.split(" ").slice(0,3).join(" "); const movDesc=ult?.nome||ult?.descricao||"Movimentação registrada"; const movComp=ult?.complementosTabelados?.[0]?.descricao||""; return `<div class="proc-card"><div class="proc-head"><div style="flex:1;min-width:0;"><div class="proc-num">${num}</div><div class="proc-assunto">${classe}${assunto!=="—"?" · "+assunto.slice(0,70):""}</div></div><div class="proc-badges"><span class="badge-trib">${p._tribunal}</span><span class="badge-ent">${entS}</span></div></div><div class="proc-body"><div class="proc-field"><label>Órgão Julgador</label><span>${orgao.slice(0,45)}</span></div><div class="proc-field"><label>Polo Ativo</label><span>${autor.slice(0,45)}</span></div><div class="proc-field"><label>Polo Passivo</label><span>${reu.slice(0,45)}</span></div></div>${ult?`<div class="proc-mov"><div class="mov-label">Última movimentação</div><div class="mov-row"><span class="mov-date">${dData?dData.toLocaleDateString("pt-BR"):"—"}</span><span class="mov-text">${movDesc}${movComp?" — "+movComp:""}</span></div></div>`:""}<div class="proc-foot"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;"><span style="font-size:10px;color:var(--gray-400);">Últ. mov.:</span><span class="dias-badge ${dClass}">${dLabel}</span>${p.dataAjuizamento?`<span style="font-size:10px;color:var(--gray-400);">· Ajuizado: ${new Date(p.dataAjuizamento).toLocaleDateString("pt-BR")}</span>`:""}</div><div style="display:flex;gap:5px;"><button class="btn-action" onclick="copiar('${num}')">📋 N°</button><button class="btn-action" onclick="abrirTrib('${p._tribunal}')">🔗 Tribunal</button></div></div></div>`; }
 function emptyHTML(t,s){ return `<div class="empty"><div class="empty-icon">⚖️</div><h3>${t}</h3><p>${s}</p></div>`; }
