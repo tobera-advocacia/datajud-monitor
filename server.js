@@ -4,39 +4,42 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATAJUD_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
+const ESCAVADOR_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNDQzYjBmMmVkOGIzNTU2ZmYyOGI0ZmY0OTBlZDBiMTE0MWUyMTJhMWZjMWU2NzIzYzA5YzY0NTgzN2NkYzgwMjhkMzc3OTMzMjUzYThhMjAiLCJpYXQiOjE3ODE3MDU4OTEuMTk4NTY0LCJuYmYiOjE3ODE3MDU4OTEuMTk4NTY2LCJleHAiOjE4MTMyODc1OTkuMTk2NDM0LCJzdWIiOiIzOTgwNTUiLCJzY29wZXMiOlsiYWNlc3Nhcl9hcGlfcGFnYWRhIiwiYWNlc3Nhcl9hcGlfcGxheWdyb3VuZCJdfQ.oq9TS17W8vW4SwYYfrEbxa4EFyTV2On-Q00LnSTqh3Tp2yWbe0CXAovC9OKcXK59PYaUQbcGD0pMCtwh9t5b3zBYlctCcsSw6pX3iHhTs9O9fTXoasDJqoAEr5794lnuWgSNQ1S2RIOrBsL_3a2Yp5Gm385wr463n-WeTy06idRHJ7ep33em_SRqvOgVbqMaTfcR2alNyEt5hLoYptKwaveKDEpI7BdwE0v1g7ostY42-j0UhEwdcwamg20jJxaPQ1710Kd473Mfo51MrnYusCMHs6_4jiIF1meryzdSVGCQno-MbweKechE5pvvqVD1BqsvokYwNwWAaLqj7TLxNerB7FOXvOvIClBJa7iX9OUHNy47UXkVpaFN50NKAxTleSdJjC3WC5wTm8ohAb94ij_TdvjzVQ7WdpO3H4Z79k0eZOpQ7yuru9w6rBq0NEGpnQTmfQ1UDlpjWhDDLyxVu6kNBzhjddFAZk2VlrBsexCile93611Fbdv2re9B1fARGf_CrzGzvV8wKeE-0PLE_0ZFA7731y4J2S62lyEfvB5vG5xrlkkJnCIE32bZ9lD3RV3q-JFhKADPfzW3SQ50qhpaFKxQ9rmdhaQ-eGlY6kurF0Hr5k7PXrzRShTYxDSU4DVVRH2YoPJuqyrDcK1wTlfdFeg2IjyWnklC-wEtndA';
 
 app.use(cors());
 app.use(express.json());
 
-app.post('/consultar', async (req, res) => {
-  const { tribunal, doc } = req.body;
-  if (!tribunal || !doc) return res.status(400).json({ erro: 'Informe tribunal e documento.' });
+// Busca processos via portal Escavador (scraping da página pública)
+app.post('/escavador', async (req, res) => {
+  const { doc } = req.body;
+  if (!doc) return res.status(400).json({ erro: 'Informe o documento.' });
 
   const docLimpo = doc.replace(/\D/g, '');
-  const url = `https://api-publica.datajud.cnj.jus.br/api_publica_${tribunal}/_search`;
-  const headers = { 'Authorization': `ApiKey ${DATAJUD_KEY}`, 'Content-Type': 'application/json' };
+  const tipo = docLimpo.length === 11 ? 'cpf' : 'cnpj';
+  const url = `https://www.escavador.com/${tipo}/${docLimpo}`;
 
-  const queries = [
-    { size: 20, query: { nested: { path: 'partes', query: { match: { 'partes.CPFouCNPJ': docLimpo } } } }, sort: [{ dataAjuizamento: { order: 'desc' } }] },
-    { size: 20, query: { nested: { path: 'partes', query: { match: { 'partes.documento': docLimpo } } } }, sort: [{ dataAjuizamento: { order: 'desc' } }] }
-  ];
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'pt-BR,pt;q=0.9',
+        'Cookie': `api_token=${ESCAVADOR_TOKEN}`
+      },
+      timeout: 20000
+    });
 
-  for (const body of queries) {
-    try {
-      const r = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), timeout: 10000 });
-      if (r.ok) {
-        const d = await r.json();
-        return res.json({ processos: (d.hits?.hits || []).map(h => h._source), total: d.hits?.total?.value || 0, tribunal });
-      }
-      if ([400, 404].includes(r.status)) continue;
-      return res.status(r.status).json({ erro: await r.text(), tribunal });
-    } catch (e) {
-      return res.status(500).json({ erro: e.message, tribunal });
-    }
+    if (!resp.ok) return res.json({ processos: [], total: 0, status: resp.status });
+
+    const html = await resp.text();
+    const regex = /\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/g;
+    const numeros = [...new Set(html.match(regex) || [])];
+
+    return res.json({ processos: numeros.map(n => ({ numeroProcesso: n, _tribunal: 'ESCAVADOR' })), total: numeros.length });
+  } catch (e) {
+    return res.status(500).json({ erro: e.message });
   }
-  return res.json({ processos: [], total: 0, tribunal });
 });
 
-app.get('/', (req, res) => res.json({ status: 'ok', versao: '3.1' }));
+app.get('/', (req, res) => res.json({ status: 'ok', versao: '4.0', modo: 'escavador' }));
 app.listen(PORT, () => console.log(`Servidor na porta ${PORT}`));
