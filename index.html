@@ -374,14 +374,20 @@ async function consultar(){
     document.getElementById("prog-count").textContent=`${atual} / ${total}`;
     document.getElementById("prog-bar").style.width=`${(atual/total)*100}%`;
     try{
-      const tipo=alvo.doc.length===11?"cpf":"cnpj";
-      const resp=await fetch(`https://www.escavador.com/${tipo}/${alvo.doc}`,{credentials:"include"});
-      if(resp.ok){
-        const txt=await resp.text();
-        const nums=[...new Set((txt.match(/\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/g)||[]))];
-        nums.forEach(n=>resultados.push({numeroProcesso:n,_entidade:alvo.nome,_doc:alvo.label,_tribunal:"ESCAVADOR"}));
+      const respEscavador=await fetch("https://tobera-datajud-proxy.onrender.com/escavador",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({doc:alvo.doc})
+      });
+      if(respEscavador.ok){
+        const data=await respEscavador.json();
+        if(data.processos?.length>0){
+          data.processos.forEach(p=>resultados.push({...p,_entidade:alvo.nome,_doc:alvo.label}));
+        } else {
+          erros.push(`${alvo.nome}: nenhum processo encontrado`);
+        }
       } else {
-        erros.push(`${alvo.nome}: HTTP ${resp.status}`);
+        erros.push(`${alvo.nome}: HTTP ${respEscavador.status}`);
       }
     }catch(e){erros.push(`${alvo.nome}: ${e.message}`);}
   }
